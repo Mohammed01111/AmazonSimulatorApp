@@ -16,8 +16,22 @@
     </div>
 
     <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        <div class="top-row px-4 d-flex justify-between align-items-center" style="height: 70px;">
+            <!-- Logo -->
+            <div>
+                <img src="images/logo.png" alt="Logo" style="height: 60px;" />
+            </div>
+
+            <!-- Search Box -->
+            <div class="flex-grow-1 mx-3">
+                <MudTextField T="string" Label="Search" Variant="Variant.Filled" FullWidth="true" Style="max-width: 350px;" />
+            </div>
+
+            <!-- Buttons (Sign Up & Log In) -->
+            <div>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/signup" Style="border-radius: 8px;">Sign Up</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Secondary" Href="/login" Style="border-radius: 8px;">Log In</MudButton>
+            </div>
         </div>
 
         <article class="content px-4">
