@@ -1,0 +1,59 @@
+﻿@page "/Login"
+@inject NavigationManager Navigation
+
+@using System.ComponentModel.DataAnnotations
+
+<MudGrid Justify="Justify.Center" AlignItems="AlignItems.Center" Style="min-height: 100vh; margin-top: 100px;">
+    <MudItem xs="12" sm="6" md="4">
+        <MudPaper Class="pa-6" Elevation="4" Style="border-radius: 10px; border: 2px solid #1976d2;">
+            <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-2">Login</MudText>
+            <MudText Typo="Typo.body2" Align="Align.Center" Class="mb-4">Enter your credentials to continue</MudText>
+
+            @if (showError)
+            {
+                <MudAlert Severity="Severity.Error" Class="mb-3">Invalid email or password</MudAlert>
+            }
+
+            <MudForm @ref="form" @bind-IsValid="@success">
+                <MudTextField T="string" Label="Email" Required="true" RequiredError="Email is required!"
+                              Validation="@(new EmailAddressAttribute() { ErrorMessage = "Invalid email address" })" Class="mb-3" />
+                <MudTextField T="string" Label="Password" InputType="InputType.Password" Required="true"
+                              RequiredError="Password is required!" Class="mb-3" />
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="LoginUser" Disabled="@(!success)">
+                    Login
+                </MudButton>
+            </MudForm>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    bool success;
+    bool showError = false;
+    MudForm form;
+
+    private void LoginUser()
+    {
+    //     if (form.IsValid)
+    //     {
+    //         // Simulated authentication logic
+    //         string dummyEmail = "test@example.com";
+    //         string dummyPassword = "Password123";
+
+    //         var emailField = form.GetFieldByLabel("Email");
+    //         var passwordField = form.GetFieldByLabel("Password");
+
+    //         if (emailField?.Text == dummyEmail && passwordField?.Text == dummyPassword)
+    //         {
+    //             // Navigate to dashboard or other page after successful login
+    //             Navigation.NavigateTo("/");
+    //         }
+    //         else
+    //         {
+    //             // Show error message if login fails
+    //             showError = true;
+    //         }
+    //     }
+    }
+}
+
