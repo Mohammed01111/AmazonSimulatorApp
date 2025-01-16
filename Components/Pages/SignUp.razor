@@ -1,9 +1,11 @@
 ﻿@page "/SignUp"
 @inject NavigationManager Navigation
-@inject AppDbContext DbContext
+@inject ApplicationDbContext DbContext
 
 @using System.Text.RegularExpressions
 @using System.ComponentModel.DataAnnotations
+@using AmazonSimulatorApp.Data
+@using static MudBlazor.CategoryTypes
 
 <MudGrid Justify="Justify.Center" AlignItems="AlignItems.Center" Style="min-height: 100vh; margin-top: 50px;">
     <MudItem xs="12" sm="6" md="4">
@@ -15,19 +17,18 @@
             {
                 <MudAlert Severity="Severity.Success" Class="mb-3">User registered successfully</MudAlert>
             }
+            @if (showFailedAlert)
+            {
+                <MudAlert Severity="Severity.Error" Class="mb-3">An error occurred</MudAlert>
+            }
 
-            <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
-                <MudTextField T="string" Label="Name" Required="true" RequiredError="Name is required!" Class="mb-3" />
-                <MudTextField T="string" Label="Email" Required="true" RequiredError="Email is required!"
-                              Validation="@(new EmailAddressAttribute() { ErrorMessage = "The email address is invalid" })" Class="mb-3" />
-                <MudTextField T="string" Label="Password" InputType="InputType.Password"
-                              Validation="@(new Func<string, IEnumerable<string>>(PasswordStrength))" Required="true"
-                              RequiredError="Password is required!" Class="mb-3" @ref="pwField1" />
-                <MudTextField T="string" Label="Confirm Password" InputType="InputType.Password"
-                              Validation="@(new Func<string, string>(PasswordMatch))" Required="true"
-                              RequiredError="Please confirm your password" Class="mb-3" />
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" Disabled="@(!success)"
-                           Class="mt-3" OnClick="RegisterUser">
+            <MudForm @ref="form" IsValid="@success">
+                <MudTextField @bind-Value="name" Label="Name" Required="true" RequiredError="Name is required!" Class="mb-3" />
+                <MudTextField @bind-Value="email" Label="Email" Required="true"
+                              Validation="@(new EmailAddressAttribute() { ErrorMessage = "Invalid email address" })" Class="mb-3" />
+                <MudTextField @bind-Value="password" Label="Password" InputType="InputType.Password" Required="true"
+                              RequiredError="Password is required!" Class="mb-3" />
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="RegisterUser">
                     Sign up
                 </MudButton>
             </MudForm>
@@ -36,48 +37,52 @@
 </MudGrid>
 
 @code {
-    bool success;
-    bool showSuccessAlert = false;
-    string[] errors = { };
-    MudTextField<string> pwField1;
-    MudForm form;
+    private MudForm form;
+    private bool success;
+    private bool showSuccessAlert = false;
+    private bool showFailedAlert = false;
 
-    private IEnumerable<string> PasswordStrength(string pw)
+    private string name;
+    private string email;
+    private string password;
+
+    private async Task RegisterUser()
     {
-        if (string.IsNullOrWhiteSpace(pw))
+        try
         {
-            yield return "Password is required!";
-            yield break;
+            if (form.IsValid)
+            {
+                var user = new User
+                    {
+                        Name = name,
+                        Email = email,
+                        Password = HashPassword(password), // Ensure to hash the password
+                        Role = "User", // Default role for new users
+                        IsVerified = false, // Set false until email verification
+                        IsActive = true // User is active by default
+                    };
+
+                DbContext.Users.Add(user);
+                await DbContext.SaveChangesAsync();
+
+                showSuccessAlert = true;
+                showFailedAlert = false;
+
+                name = string.Empty;
+                email = string.Empty;
+                password = string.Empty;
+            }
         }
-        if (pw.Length < 8)
-            yield return "Password must be at least 8 characters long";
-        if (!Regex.IsMatch(pw, @"[A-Z]"))
-            yield return "Password must contain at least one uppercase letter";
-        if (!Regex.IsMatch(pw, @"[a-z]"))
-            yield return "Password must contain at least one lowercase letter";
-        if (!Regex.IsMatch(pw, @"[0-9]"))
-            yield return "Password must contain at least one number";
+        catch (Exception)
+        {
+            showSuccessAlert = false;
+            showFailedAlert = true;
+        }
     }
 
-    private string PasswordMatch(string confirmPassword)
+    private string HashPassword(string password)
     {
-        if (pwField1.Value != confirmPassword)
-            return "Passwords don't match";
-        return null;
-    }
-
-    private void RegisterUser()
-    {
-        if (form.IsValid)
-        {
-            // Registration logic can go here
-            Navigation.NavigateTo("/");
-
-            // Show success alert
-            showSuccessAlert = true;
-
-            // Simulate a delay before navigating to another page (if needed)
-            // Here, we can keep the user on the same page for now.
-        }
+        // Replace this with a real hashing algorithm like BCrypt, SHA256, or PBKDF2
+        return Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(password));
     }
 }
