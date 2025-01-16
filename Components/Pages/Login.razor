@@ -1,7 +1,11 @@
 ﻿@page "/Login"
 @inject NavigationManager Navigation
+@inject ApplicationDbContext DbContext
+@inject UserState UserState
 
 @using System.ComponentModel.DataAnnotations
+@using AmazonSimulatorApp.Services
+@using Microsoft.EntityFrameworkCore
 
 <MudGrid Justify="Justify.Center" AlignItems="AlignItems.Center" Style="min-height: 100vh; margin-top: 100px;">
     <MudItem xs="12" sm="6" md="4">
@@ -14,12 +18,12 @@
                 <MudAlert Severity="Severity.Error" Class="mb-3">Invalid email or password</MudAlert>
             }
 
-            <MudForm @ref="form" @bind-IsValid="@success">
-                <MudTextField T="string" Label="Email" Required="true" RequiredError="Email is required!"
+            <MudForm @ref="form" IsValid="@success">
+                <MudTextField @bind-Value="email" Label="Email" Required="true" RequiredError="Email is required!"
                               Validation="@(new EmailAddressAttribute() { ErrorMessage = "Invalid email address" })" Class="mb-3" />
-                <MudTextField T="string" Label="Password" InputType="InputType.Password" Required="true"
+                <MudTextField @bind-Value="password" Label="Password" InputType="InputType.Password" Required="true"
                               RequiredError="Password is required!" Class="mb-3" />
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="LoginUser" Disabled="@(!success)">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="LoginUser">
                     Login
                 </MudButton>
             </MudForm>
@@ -28,32 +32,51 @@
 </MudGrid>
 
 @code {
-    bool success;
-    bool showError = false;
-    MudForm form;
+    private bool success;
+    private bool showError = false;
+    private MudForm form;
+    private string email;
+    private string password;
 
-    private void LoginUser()
+    private async Task LoginUser()
     {
-    //     if (form.IsValid)
-    //     {
-    //         // Simulated authentication logic
-    //         string dummyEmail = "test@example.com";
-    //         string dummyPassword = "Password123";
+        if (form.IsValid)
+        {
+            try
+            {
+                var user = await DbContext.Users
+                    .Where(u => u.Email == email)
+                    .FirstOrDefaultAsync();
 
-    //         var emailField = form.GetFieldByLabel("Email");
-    //         var passwordField = form.GetFieldByLabel("Password");
+                if (user != null && VerifyPassword(password, user.Password))
+                {
+                    // Set the logged-in user's name in UserState
+                    UserState.LogIn(user.Name);
 
-    //         if (emailField?.Text == dummyEmail && passwordField?.Text == dummyPassword)
-    //         {
-    //             // Navigate to dashboard or other page after successful login
-    //             Navigation.NavigateTo("/");
-    //         }
-    //         else
-    //         {
-    //             // Show error message if login fails
-    //             showError = true;
-    //         }
-    //     }
+                    // Redirect to the homepage or dashboard
+                    Navigation.NavigateTo("/");
+                }
+                else
+                {
+                    showError = true;
+                }
+            }
+            catch (Exception)
+            {
+                showError = true;
+            }
+        }
+    }
+
+    private bool VerifyPassword(string enteredPassword, string storedPasswordHash)
+    {
+        // Example: Compare hashed passwords (implement actual hashing logic)
+        return HashPassword(enteredPassword) == storedPasswordHash;
+    }
+
+    private string HashPassword(string password)
+    {
+        // Replace this with a secure password hashing algorithm (e.g., BCrypt, SHA256)
+        return Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(password));
     }
 }
-
