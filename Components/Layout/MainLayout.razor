@@ -1,5 +1,8 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager Navigation
+@inject UserState UserState
+
+@using AmazonSimulatorApp.Services
 
 
 @* Required *@
@@ -29,12 +32,22 @@
                 <MudTextField T="string" Label="Search" Variant="Variant.Filled" FullWidth="true" Style="max-width: 350px;" />
             </div>
 
-            <!-- Buttons (Sign Up & Log In) -->
+            <!-- User Info or Buttons -->
             <div>
-                <MudButtonGroup Color="Color.Primary" Size="Size.Large" Variant="Variant. Outlined">
-                    <MudButton OnClick="@NavigateToSignUp">Sign Up</MudButton>
-                    <MudButton OnClick="@NavigateToLogin">Login</MudButton>
-                </MudButtonGroup>
+                @if (UserState.IsLoggedIn)
+                {
+                    <div class="d-flex align-items-center">
+                        <MudText Typo="Typo.subtitle1" Class="mr-2">Hello, @UserState.UserName</MudText>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="@LogOut">Log Out</MudButton>
+                    </div>
+                }
+                else
+                {
+                    <MudButtonGroup Color="Color.Primary" Size="Size.Large" Variant="Variant.Outlined">
+                        <MudButton OnClick="@NavigateToSignUp">Sign Up</MudButton>
+                        <MudButton OnClick="@NavigateToLogin">Login</MudButton>
+                    </MudButtonGroup>
+                }
             </div>
         </div>
 
@@ -61,5 +74,11 @@
     {
         // Navigate to the SignUp page
         Navigation.NavigateTo("/Login");
+    }
+
+    private void LogOut()
+    {
+        UserState.LogOut();
+        Navigation.NavigateTo("/");
     }
 }
