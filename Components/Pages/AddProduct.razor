@@ -1,0 +1,59 @@
+﻿
+@page "/AddProduct"
+@using AmazonSimulatorApp.Data
+@using AmazonSimulatorApp.Services
+@using Microsoft.EntityFrameworkCore
+@using static MudBlazor.CategoryTypes
+@inject IProductService ProductService
+@inject NavigationManager Navigation
+@inject ApplicationDbContext DbContext
+
+<h3>Add Product</h3>
+
+@if (showSuccessAlert)
+{
+    <MudAlert Severity="Severity.Success" Class="mb-3">Product has been added successfully</MudAlert>
+}
+@if (showFailedAlert)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-3">An error occurred</MudAlert>
+}
+
+
+<MudForm @ref="form" OnValidSubmit="HandleValidSubmit">
+    <MudTextField T="string" Label="Product Name" @bind-Value="newProduct.Name" Variant="Variant.Outlined" Class="mb-3" />
+    <MudTextField T="decimal" Label="Price" @bind-Value="newProduct.Price" Variant="Variant.Outlined" Class="mb-3" />
+    <MudTextField T="string" Label="Description" @bind-Value="newProduct.Description" Variant="Variant.Outlined" Class="mb-3" />
+    <MudTextField T="string" Label="Image URL" @bind-Value="newProduct.Image" Variant="Variant.Outlined" Class="mb-3" />
+    <MudTextField T="int" Label="Seller ID" @bind-Value="newProduct.SID" Variant="Variant.Outlined" Class="mb-3" />
+    <MudTextField T="int" Label="Category ID" @bind-Value="newProduct.CatID" Variant="Variant.Outlined" Class="mb-3" />
+
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="HandleValidSubmit">
+        Add Product
+    </MudButton>
+</MudForm>
+
+@code {
+    private MudForm form; // Bound to the EditForm via @ref
+    private bool showSuccessAlert = false;
+    private bool showFailedAlert = false;
+    private Product newProduct = new Product();
+
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            DbContext.Products.Add(newProduct);
+            await DbContext.SaveChangesAsync();
+
+            showSuccessAlert = true;
+            // Reset the form
+            newProduct = new Product();
+        }
+        catch (Exception ex)
+        {
+            showFailedAlert = true;
+        }
+    }
+}
