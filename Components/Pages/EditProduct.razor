@@ -63,7 +63,7 @@ else
         product.Description = editProduct.Description;
 
         ProductService.UpdateProduct(product);
-        Navigation.NavigateTo("/products");
+        Navigation.NavigateTo("/ProductList");
     }
 
     private void Cancel()
@@ -76,6 +76,6 @@ else
                 Price = product.Price,
                 Description = product.Description
             };
-        Navigation.NavigateTo("/products");
+        Navigation.NavigateTo("/ProductList");
     }
 }
