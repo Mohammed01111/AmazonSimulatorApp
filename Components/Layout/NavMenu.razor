@@ -1,11 +1,51 @@
-﻿<MudPaper Width="250px" Class="d-inline-flex py-3" Elevation="0">
+﻿@inject ApplicationDbContext DbContext
+
+@using AmazonSimulatorApp.Components.Pages
+@using AmazonSimulatorApp.Data
+@using Microsoft.EntityFrameworkCore
+
+
+<MudPaper Width="250px" Class="d-inline-flex py-3" Elevation="0">
     <MudNavMenu Class="mud-width-full">
         <MudText Typo="Typo.h6" Class="px-4">Amazon Simulator</MudText>
         <MudDivider Class="my-2" />
         <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
         <MudNavLink Href="/ProductList" Icon="@Icons.Material.Filled.List">Products</MudNavLink>
         <MudNavLink Href="/Addproduct" Icon="@Icons.Material.Filled.Add">Add Prodoct</MudNavLink>
-        <MudNavLink Href="/servers" Icon="@Icons.Material.Filled.Category">Categoties</MudNavLink>
+        <MudNavGroup Title="Category" Expanded="true">
+            @if (categories != null)
+            {
+                @foreach (var category in categories)
+                {
+                    <MudNavLink Href="@($"/ProductCategory/{category.CatID}")">
+                        @category.Name
+                    </MudNavLink>
+                }
+            }
+            else
+            {
+                <MudText>Loading categories...</MudText>
+            }
+        </MudNavGroup>
     </MudNavMenu>
 </MudPaper>
+
+
+@code {
+    private List<Category> categories;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Fetch categories from the database
+            categories = await DbContext.Categories.ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching categories: {ex.Message}");
+        }
+    }
+}
+
 

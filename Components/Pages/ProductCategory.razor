@@ -1,0 +1,58 @@
+﻿@page "/ProductCategory/{categoryId:int}"
+
+@using AmazonSimulatorApp.Data
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext DbContext
+
+<h3>Products in this category</h3>
+
+@if (products == null)
+{
+    <p>Loading products...</p>
+}
+else if (!products.Any())
+{
+    <p>No products found in this category.</p>
+}
+else
+{
+    <MudGrid>
+        @foreach (var product in products)
+        {
+            <MudItem xs="12" sm="6" md="4">
+                <MudCard>
+                    <MudCardMedia Image="@product.Image" Height="200" />
+                    <MudCardContent>
+                        <MudText Typo="Typo.h5">@product.Name</MudText>
+                        <MudText Typo="Typo.body2">@product.Description</MudText>
+                        <MudText Typo="Typo.body2">Price: @product.Price</MudText>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => AddToCart(product.PID))">
+                            Add to cart
+                        </MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+@code {
+    [Parameter] public int categoryId { get; set; }
+    private List<Product> products;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Filter products by the specified category ID
+        products = await DbContext.Products
+            .Where(p => p.CatID == categoryId)
+            .ToListAsync();
+    }
+
+    private void AddToCart(int productId)
+    {
+        // Logic to add the product to the cart
+        Console.WriteLine($"Product {productId} added to cart.");
+    }
+}

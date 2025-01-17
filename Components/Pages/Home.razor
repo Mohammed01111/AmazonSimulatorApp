@@ -1,4 +1,5 @@
 ﻿@page "/"
+@inject NavigationManager Navigation
 
 <PageTitle>Amazon Simulator</PageTitle>
 
@@ -47,8 +48,9 @@
                 <MudText Typo="Typo.body2">Discover the latest gadgets and electronics. From smartphones to smart home devices, we've got it all.</MudText>
             </MudCardContent>
             <MudCardActions>
-                <MudButton Variant="Variant.Text" Color="Color.Primary">Shop Electronics</MudButton>
-                <MudButton Variant="Variant.Text" Color="Color.Primary">See All</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="NavigateToCategory">
+                    Shop Electronics
+                </MudButton>
             </MudCardActions>
         </MudCard>
     </MudItem>
@@ -76,4 +78,10 @@
     private bool enableSwipeGesture = true;
     private bool autocycle = true;
     private Transition transition = Transition.Slide;
+
+    private void NavigateToCategory()
+    {
+        int electronicsCategoryId = 1; // Replace with the actual Category ID for Electronics
+        Navigation.NavigateTo($"/ProductCategory/{electronicsCategoryId}");
+    }
 }
