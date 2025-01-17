@@ -1,5 +1,8 @@
 ﻿@page "/"
+@using Microsoft.EntityFrameworkCore
+@using AmazonSimulatorApp.Data
 @inject NavigationManager Navigation
+@inject ApplicationDbContext DbContext
 
 <PageTitle>Amazon Simulator</PageTitle>
 
@@ -33,8 +36,9 @@
                 <MudText Typo="Typo.body2">Explore our wide range of furniture for your living room, bedroom, and office space. Stylish and comfortable for every home.</MudText>
             </MudCardContent>
             <MudCardActions>
-                <MudButton Variant="Variant.Text" Color="Color.Primary">Browse Furniture</MudButton>
-                <MudButton Variant="Variant.Text" Color="Color.Primary">View More</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="() => NavigateToCategory(FurnitureCategoryId)">
+                    Shop Furniture
+                </MudButton>
             </MudCardActions>
         </MudCard>
     </MudItem>
@@ -48,7 +52,7 @@
                 <MudText Typo="Typo.body2">Discover the latest gadgets and electronics. From smartphones to smart home devices, we've got it all.</MudText>
             </MudCardContent>
             <MudCardActions>
-                <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="NavigateToCategory">
+                <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="() => NavigateToCategory(ElectronicsCategoryId)">
                     Shop Electronics
                 </MudButton>
             </MudCardActions>
@@ -64,8 +68,9 @@
                 <MudText Typo="Typo.body2">Find the latest trends in fashion. From casual wear to formal outfits, we have something for everyone.</MudText>
             </MudCardContent>
             <MudCardActions>
-                <MudButton Variant="Variant.Text" Color="Color.Primary">Shop Clothing</MudButton>
-                <MudButton Variant="Variant.Text" Color="Color.Primary">Explore Fashion</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="() => NavigateToCategory(ClothingCategoryId)">
+                    Shop Clothing
+                </MudButton>
             </MudCardActions>
         </MudCard>
     </MudItem>
@@ -78,10 +83,27 @@
     private bool enableSwipeGesture = true;
     private bool autocycle = true;
     private Transition transition = Transition.Slide;
+    private List<Category> categories;
+    private int ElectronicsCategoryId = 1;
+    private int FurnitureCategoryId = 2;
+    private int ClothingCategoryId = 3;
 
-    private void NavigateToCategory()
+    protected override async Task OnInitializedAsync()
     {
-        int electronicsCategoryId = 1; // Replace with the actual Category ID for Electronics
-        Navigation.NavigateTo($"/ProductCategory/{electronicsCategoryId}");
+        try
+        {
+            // Fetch categories from the database
+            categories = await DbContext.Categories.ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching categories: {ex.Message}");
+        }
+    }
+
+    private void NavigateToCategory(int categoryId)
+    {
+        // Navigate to the selected category page
+        Navigation.NavigateTo($"/ProductCategory/{categoryId}");
     }
 }
